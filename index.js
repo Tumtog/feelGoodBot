@@ -246,6 +246,7 @@ bot.command("start", async (ctx) => {
   }
 });
 
+
 bot.on("callback_query", async (ctx) => {
   const chatId = ctx.chat.id;
   const data = ctx.callbackQuery.data;
@@ -264,6 +265,7 @@ bot.on("callback_query", async (ctx) => {
     await ctx.deleteMessage();
   }
 });
+
 
 const clearChatMessages = async (chatId) => {
   const history = await bot.api.getChatHistory(chatId, {
@@ -300,7 +302,11 @@ scheduleDailyCleanup();
 bot.on("message:text", async (ctx) => {
   const chatId = ctx.chat.id;
   const userId = ctx.from.id;
-  if (!userGender[chatId]) {
+
+  if (userId === snezhanaId) {
+    // Если сообщение от Снежаны, отправляем ей персональные похвалы
+    sendRandomCompliment(chatId, snezhanaCompliments);
+  } else if (!userGender[chatId]) {
     // Если пол не выбран, просим выбрать
     const genderKeyboard = new InlineKeyboard()
       .text("Женщина", "gender_female")
@@ -309,8 +315,6 @@ bot.on("message:text", async (ctx) => {
     await ctx.reply("Пожалуйста, укажите ваш пол:", {
       reply_markup: genderKeyboard,
     });
-  } else if (userId === snezhanaId) {
-    sendRandomCompliment(chatId, snezhanaCompliments);
   } else {
     // Отправляем похвалу в зависимости от выбранного пола
     const compliments =
@@ -318,6 +322,7 @@ bot.on("message:text", async (ctx) => {
     sendRandomCompliment(chatId, compliments);
   }
 });
+
 
 // Обработка ошибок
 bot.catch((err) => {

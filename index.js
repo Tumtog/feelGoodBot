@@ -4,33 +4,46 @@ const cron = require("node-cron");
 const express = require("express");
 const bodyParser = require("body-parser");
 
+const bot = new Bot(process.env.BOT_API_KEY);
 const app = express();
 app.use(bodyParser.json());
-
-const bot = new Bot(process.env.BOT_API_KEY);
-const webhookURL =
-  "bot.setWebHook('https://feel-good-7ttut77ol-tumtogs-projects.vercel.app/webhook');";
-
-bot.api.setWebhook(webhookURL);
 
 app.post("/webhook", (req, res) => {
   bot.handleUpdate(req.body);
   res.sendStatus(200);
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// Удаление вебхука перед установкой нового
+const setupWebhook = async () => {
+  try {
+    await bot.api.deleteWebhook();
+    console.log("Webhook deleted successfully");
+
+    const webhookUrl =
+      "https://feel-good-7ttut77ol-tumtogs-projects.vercel.app/webhook";
+    await bot.api.setWebhook(webhookUrl);
+    console.log("Webhook set successfully");
+  } catch (err) {
+    console.error("Error:", err);
+  }
+};
+
+setupWebhook();
+
+app.listen(3000, () => {
+  console.log("Server is running on port 3000");
 });
 
 module.exports = app;
 
+// Команды
 bot.api.setMyCommands([
   {
     command: "start",
     description: "Начать",
   },
 ]);
+
 // Похвалы для женщин
 const womenCompliments = [
   "Ти чудово справляєшся! 🌟",
@@ -187,7 +200,6 @@ const snezhanaCompliments = [
   "Твоя усмішка, Сніжана, - це моє сонце! ☀️",
   "Сніжана, ти - моя гордість! 🏅",
 ];
-
 const snezhanaId = 408453544; // Замените на ID Сніжани
 const userGender = {}; // Объект для хранения пола пользователя по chatId
 
@@ -285,17 +297,8 @@ bot.on("callback_query", async (ctx) => {
 });
 
 const clearChatMessages = async (chatId) => {
-  const history = await bot.api.getChatHistory(chatId, {
-    limit: 100, // Количество сообщений для удаления
-  });
-
-  for (const message of history.messages) {
-    try {
-      await bot.api.deleteMessage(chatId, message.message_id);
-    } catch (error) {
-      console.error(`Failed to delete message ${message.message_id}:`, error);
-    }
-  }
+  // Вебхуки могут не поддерживать метод getChatHistory
+  // Этот код должен быть переписан в зависимости от используемых методов
 };
 
 const scheduleDailyCleanup = () => {
@@ -315,7 +318,6 @@ const scheduleDailyCleanup = () => {
 
 scheduleDailyCleanup();
 
-// Обработка текстовых сообщений
 bot.on("message:text", async (ctx) => {
   const chatId = ctx.chat.id;
 
@@ -340,14 +342,3 @@ bot.on("message:text", async (ctx) => {
 bot.catch((err) => {
   console.error("Error occurred:", err);
 });
-
-bot.start();
-
-console.log("Бот запущен!");
-
-app.post("/webhook", (req, res) => {
-  bot.handleUpdate(req.body);
-  res.sendStatus(200);
-});
-
-module.exports = app;

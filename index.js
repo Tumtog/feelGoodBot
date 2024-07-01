@@ -15,6 +15,10 @@ const { webhookCallback } = require("grammy");
 app.use(express.json());
 app.use(webhookCallback(bot, "express"));
 
+const DOMAIN = 'https://feel-good-bot.vercel.app/'; // Замените на ваш домен
+bot.api.setWebhook(`https://${DOMAIN}/webhook`);
+
+
 // Похвалы для женщин
 const womenCompliments = [
   "Ти чудово справляєшся! 🌟",

@@ -11,9 +11,6 @@ bot.api.setMyCommands([
     description: "Начать",
   },
 ]);
-const { webhookCallback } = require("grammy");
-app.use(express.json());
-app.use(webhookCallback(bot, "express"));
 
 // Похвалы для женщин
 const womenCompliments = [

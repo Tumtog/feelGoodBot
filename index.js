@@ -9,7 +9,7 @@ app.use(bodyParser.json());
 
 const bot = new Bot(process.env.BOT_API_KEY);
 const webhookURL =
-  "https://https://feel-good-bot.vercel.app/verwebhook";
+  "bot.setWebHook('https://feel-good-7ttut77ol-tumtogs-projects.vercel.app/webhook');";
 
 bot.api.setWebhook(webhookURL);
 

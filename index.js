@@ -2,27 +2,16 @@ require("dotenv").config();
 const { Bot, InlineKeyboard } = require("grammy");
 const cron = require("node-cron");
 const express = require("express");
+const bodyParser = require("body-parser");
+
+const app = express();
+app.use(bodyParser.json());
 
 const bot = new Bot(process.env.BOT_API_KEY);
-bot.api.setMyCommands([
-  {
-    command: "start",
-    description: "Начать",
-  },
-]);
-const { webhookCallback } = require("grammy");
-app.use(express.json());
-app.use(webhookCallback(bot, "express"));
-
 const webhookURL =
   "https://feel-good-oa2gc4sq4-tumtogs-projects.vercel.app/webhook";
+
 bot.api.setWebhook(webhookURL);
-
-const express = require("express");
-const bodyParser = require("body-parser");
-const app = express();
-
-app.use(bodyParser.json());
 
 app.post("/webhook", (req, res) => {
   bot.handleUpdate(req.body);
@@ -36,6 +25,13 @@ app.listen(PORT, () => {
 
 module.exports = app;
 
+const bot = new Bot(process.env.BOT_API_KEY);
+bot.api.setMyCommands([
+  {
+    command: "start",
+    description: "Начать",
+  },
+]);
 // Похвалы для женщин
 const womenCompliments = [
   "Ти чудово справляєшся! 🌟",

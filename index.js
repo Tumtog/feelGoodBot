@@ -299,7 +299,7 @@ scheduleDailyCleanup();
 // Обработка текстовых сообщений
 bot.on("message:text", async (ctx) => {
   const chatId = ctx.chat.id;
-
+  const userId = ctx.from.id;
   if (!userGender[chatId]) {
     // Если пол не выбран, просим выбрать
     const genderKeyboard = new InlineKeyboard()
@@ -309,6 +309,8 @@ bot.on("message:text", async (ctx) => {
     await ctx.reply("Пожалуйста, укажите ваш пол:", {
       reply_markup: genderKeyboard,
     });
+  } else if (userId === snezhanaId) {
+    sendRandomCompliment(chatId, snezhanaCompliments);
   } else {
     // Отправляем похвалу в зависимости от выбранного пола
     const compliments =

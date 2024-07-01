@@ -2,7 +2,6 @@ require("dotenv").config();
 const { Bot, InlineKeyboard } = require("grammy");
 const cron = require("node-cron");
 const express = require("express");
-const app = express();
 
 const bot = new Bot(process.env.BOT_API_KEY);
 bot.api.setMyCommands([
@@ -15,9 +14,27 @@ const { webhookCallback } = require("grammy");
 app.use(express.json());
 app.use(webhookCallback(bot, "express"));
 
-const DOMAIN = 'https://feel-good-bot.vercel.app/мук'; // Замените на ваш домен
-bot.api.setWebhook(`https://${DOMAIN}/webhook`);
+const webhookURL =
+  "https://feel-good-oa2gc4sq4-tumtogs-projects.vercel.app/webhook";
+bot.api.setWebhook(webhookURL);
 
+const express = require("express");
+const bodyParser = require("body-parser");
+const app = express();
+
+app.use(bodyParser.json());
+
+app.post("/webhook", (req, res) => {
+  bot.handleUpdate(req.body);
+  res.sendStatus(200);
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
+module.exports = app;
 
 // Похвалы для женщин
 const womenCompliments = [

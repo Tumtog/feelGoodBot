@@ -1,6 +1,8 @@
 require("dotenv").config();
 const { Bot, InlineKeyboard } = require("grammy");
 const cron = require("node-cron");
+const express = require("express");
+const app = express();
 
 const bot = new Bot(process.env.BOT_API_KEY);
 bot.api.setMyCommands([
@@ -278,14 +280,18 @@ const clearChatMessages = async (chatId) => {
 };
 
 const scheduleDailyCleanup = () => {
-  cron.schedule("0 3 * * *", async () => {
-    for (const chatId in userGender) {
-      await clearChatMessages(chatId);
+  cron.schedule(
+    "0 3 * * *",
+    async () => {
+      for (const chatId in userGender) {
+        await clearChatMessages(chatId);
+      }
+    },
+    {
+      scheduled: true,
+      timezone: "Europe/Kiev",
     }
-  }, {
-    scheduled: true,
-    timezone: "Europe/Kiev",
-  });
+  );
 };
 
 scheduleDailyCleanup();
@@ -305,7 +311,8 @@ bot.on("message:text", async (ctx) => {
     });
   } else {
     // Отправляем похвалу в зависимости от выбранного пола
-    const compliments = userGender[chatId] === "female" ? womenCompliments : menCompliments;
+    const compliments =
+      userGender[chatId] === "female" ? womenCompliments : menCompliments;
     sendRandomCompliment(chatId, compliments);
   }
 });
@@ -318,3 +325,10 @@ bot.catch((err) => {
 bot.start();
 
 console.log("Бот запущен!");
+
+app.post("/webhook", (req, res) => {
+  bot.handleUpdate(req.body);
+  res.sendStatus(200);
+});
+
+module.exports = app;

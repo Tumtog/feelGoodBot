@@ -8,19 +8,18 @@ const bot = new Bot(process.env.BOT_API_KEY);
 const app = express();
 app.use(bodyParser.json());
 
-app.post("/webhook", (req, res) => {
-  bot.handleUpdate(req.body);
-  res.sendStatus(200);
-});
-
 // Удаление вебхука перед установкой нового
-const setupWebhook = async () => {
+const setWebhook = async () => {
   try {
+    // Удаляем старый вебхук
     await bot.api.deleteWebhook();
     console.log("Webhook deleted successfully");
 
-    const webhookUrl =
-      "https://feel-good-7ttut77ol-tumtogs-projects.vercel.app/webhook";
+    // Добавляем задержку для завершения удаления
+    await new Promise(resolve => setTimeout(resolve, 5000));
+
+    // Устанавливаем новый вебхук
+    const webhookUrl = "https://feel-good-7ttut77ol-tumtogs-projects.vercel.app/webhook";
     await bot.api.setWebhook(webhookUrl);
     console.log("Webhook set successfully");
   } catch (err) {
@@ -28,21 +27,16 @@ const setupWebhook = async () => {
   }
 };
 
-setupWebhook();
+setWebhook();
+
+app.post("/webhook", (req, res) => {
+  bot.handleUpdate(req.body);
+  res.sendStatus(200);
+});
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
 });
-
-module.exports = app;
-
-// Команды
-bot.api.setMyCommands([
-  {
-    command: "start",
-    description: "Начать",
-  },
-]);
 
 // Похвалы для женщин
 const womenCompliments = [
@@ -200,7 +194,8 @@ const snezhanaCompliments = [
   "Твоя усмішка, Сніжана, - це моє сонце! ☀️",
   "Сніжана, ти - моя гордість! 🏅",
 ];
-const snezhanaId = 408453544; // Замените на ID Сніжани
+
+const snezhanaId = 408453544; // Замените на ID Сніжаны
 const userGender = {}; // Объект для хранения пола пользователя по chatId
 
 const getRandomCompliment = (compliments) => {
@@ -296,28 +291,7 @@ bot.on("callback_query", async (ctx) => {
   }
 });
 
-const clearChatMessages = async (chatId) => {
-  // Вебхуки могут не поддерживать метод getChatHistory
-  // Этот код должен быть переписан в зависимости от используемых методов
-};
-
-const scheduleDailyCleanup = () => {
-  cron.schedule(
-    "0 3 * * *",
-    async () => {
-      for (const chatId in userGender) {
-        await clearChatMessages(chatId);
-      }
-    },
-    {
-      scheduled: true,
-      timezone: "Europe/Kiev",
-    }
-  );
-};
-
-scheduleDailyCleanup();
-
+// Обработка текстовых сообщений
 bot.on("message:text", async (ctx) => {
   const chatId = ctx.chat.id;
 
@@ -342,3 +316,7 @@ bot.on("message:text", async (ctx) => {
 bot.catch((err) => {
   console.error("Error occurred:", err);
 });
+
+bot.start();
+
+console.log("Бот запущен!");
